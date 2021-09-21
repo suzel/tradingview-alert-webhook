@@ -1,0 +1,16 @@
+{
+    "passphrase": "suzel",
+    "time": "2020-09-06T01:44:17Z",
+    "exchange": "BINANCE",
+    "ticker": "SOLUSDT",
+    "order_action": "buy",
+    "order_contracts": 0.2,
+    "bar": {
+        "time": "2020-09-06T01:43:00Z",
+        "open": 0.002748,
+        "high": 0.0027486,
+        "low": 0.002748,
+        "close": 0.0027486,
+        "volume": 150177
+    }
+}
