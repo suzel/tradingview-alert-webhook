@@ -1,6 +1,8 @@
 {
     "recommendations": [
       "EditorConfig.editorconfig",
+      "ex-codes.pine-script-syntax-highlighter",
+      "mikestead.dotenv",
       "sandy081.todotasks"
     ]
   }
