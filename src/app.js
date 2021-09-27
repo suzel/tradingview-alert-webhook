@@ -30,7 +30,7 @@ app.post('/webhook', async (req, res) => {
     return
   }
 
-  if (quantity) {
+  if (quantity == 0) {
     const price = await binance.prices(ticker)
     quantity = parseFloat(capital) / parseFloat(price[ticker])
   }
