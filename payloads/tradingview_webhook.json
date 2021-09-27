@@ -2,7 +2,10 @@
     "passphrase": "suzel",
     "time": "2020-09-06T01:44:17Z",
     "exchange": "BINANCE",
+    "side": "buy",
     "ticker": "DOGEUSDT",
+    "quantity": 0,
+    "capital": 50,
     "bar": {
         "time": "2020-09-06T01:43:00Z",
         "open": 0.002748,

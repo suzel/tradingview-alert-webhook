@@ -1,50 +1,59 @@
 require('dotenv').config()
 const express = require('express')
-const bodyParser = require('body-parser')
 const Binance = require('node-binance-api')
 
 const app = express()
 const port = 3000
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
+
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
 const binance = new Binance().options({
-    APIKEY: process.env.BINANCE_API_KEY,
-    APISECRET: process.env.BINANCE_API_SECRET
+  APIKEY: process.env.BINANCE_API_KEY,
+  APISECRET: process.env.BINANCE_API_SECRET
 })
 
-app.get('/', (req, res) => res.send('Tradingview Webhooks'))
+app.get('/', async (req, res) => res.send('Tradingview Webhooks'))
 
-app.post('/webhook', (req, res) => {
+app.post('/webhook', async (req, res) => {
 
-    const params = req.body
+  let { exchange, passphrase, quantity = 0, side = 'buy', ticker, capital = 0 } = req.body
 
-    // Validation
-    if (params.passphrase != process.env.WEBHOOK_PASSPHRASE) {
-        res.json({ 'code': 'error', 'message': 'Nice try, invalid passphrase' })
-        return
-    }
+  // Validation
+  if (exchange != 'BINANCE') {
+    res.json({ 'code': 'error', 'message': 'Invalid exchange' })
+    return
+  }
 
-    const side = params.order_action
-    const quantity = params.order_contracts
-    const ticker = params.ticker
+  if (passphrase != process.env.WEBHOOK_PASSPHRASE) {
+    res.json({ 'code': 'error', 'message': 'Invalid passphrase' })
+    return
+  }
 
-    // Sending order {order_type} - {side} {quantity} {symbol}
-    // symbol=symbol, side=side, type=order_type, quantity=quantity
-    if (side == 'buy') {
-        binance.marketBuy(ticker, quantity)
-        res.json({ 'code': 'success', 'message': 'order executed' })
-    }
+  if (quantity) {
+    const price = await binance.prices(ticker)
+    quantity = parseFloat(capital) / parseFloat(price[ticker])
+  }
 
-    if (side == 'sell') {
-        binance.marketSell(ticker, quantity)
-        res.json({ 'code': 'success', 'message': 'order executed' })
-    }
+  console.info(`Sending order : Market - ${side} ${quantity} ${ticker}`)
 
-    // Order failed
+  // Buy
+  if (side == 'buy') {
+    const result = await binance.marketBuy(ticker, quantity)
+    console.info(result)
+    res.json({ 'code': 'success', 'message': 'order executed' })
+  }
+
+  // Sell
+  if (side == 'sell') {
+    const result = await binance.marketSell(ticker, quantity)
+    console.info(result)
+    res.json({ 'code': 'success', 'message': 'order executed' })
+    // TODO: Order failed
     // an exception occured
     // res.json({ 'code': 'error', 'message': 'order failed' })
     // res.sendStatus(200)
+  }
 
 })
 
