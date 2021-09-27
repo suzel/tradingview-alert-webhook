@@ -39,20 +39,22 @@ app.post('/webhook', async (req, res) => {
 
   // Buy
   if (side == 'buy') {
-    const result = await binance.marketBuy(ticker, quantity)
-    console.info(result)
-    res.json({ 'code': 'success', 'message': 'order executed' })
+    try {
+      const result = await binance.marketBuy(ticker, quantity)
+      res.json({ 'code': 'success', 'message': 'order executed' })
+    } catch (err) {
+      res.json({ 'code': 'error', 'message': err.body })
+    }
   }
 
   // Sell
   if (side == 'sell') {
-    const result = await binance.marketSell(ticker, quantity)
-    console.info(result)
-    res.json({ 'code': 'success', 'message': 'order executed' })
-    // TODO: Order failed
-    // an exception occured
-    // res.json({ 'code': 'error', 'message': 'order failed' })
-    // res.sendStatus(200)
+    try {
+      const result = await binance.marketSell(ticker, quantity)
+      res.json({ 'code': 'success', 'message': 'order executed' })
+    } catch (err) {
+      res.json({ 'code': 'error', 'message': err.body })
+    }
   }
 
 })
