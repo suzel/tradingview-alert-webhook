@@ -4,4 +4,4 @@ TradingView Strategy Alert Webhook that buys and sells crypto with the Binance A
 
 ## Project URL
 
-- https://tv-webhook.sukruuzel.com/webhook/
+- https://tradingview.sukruuzel.com/webhook/
