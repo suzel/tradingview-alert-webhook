@@ -50,6 +50,8 @@ app.post('/webhook', async (req, res) => {
   // Sell
   if (side == 'sell') {
     try {
+      const balances = await binance.balance()
+      quantity = balances[ticker.replace('USDT', '')].available
       const result = await binance.marketSell(ticker, quantity)
       res.json({ 'code': 'success', 'message': 'order executed' })
     } catch (err) {
