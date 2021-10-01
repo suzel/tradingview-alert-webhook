@@ -1,8 +1,9 @@
 {
-    "recommendations": [
-      "EditorConfig.editorconfig",
-      "ex-codes.pine-script-syntax-highlighter",
-      "mikestead.dotenv",
-      "sandy081.todotasks"
-    ]
-  }
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "EditorConfig.editorconfig",
+    "ex-codes.pine-script-syntax-highlighter",
+    "mikestead.dotenv",
+    "sandy081.todotasks"
+  ]
+}

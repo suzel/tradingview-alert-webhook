@@ -1,6 +1,8 @@
 require('dotenv').config()
+
 const express = require('express')
 const Binance = require('node-binance-api')
+const { Webhook } = require('discord-webhook-node')
 
 const app = express()
 const port = 3000
@@ -13,11 +15,11 @@ const binance = new Binance().options({
   APISECRET: process.env.BINANCE_API_SECRET
 })
 
-app.get('/', async (req, res) => res.send('Tradingview Webhooks'))
+const hook = new Webhook(process.env.DISCORD_WEBHOOK_URL)
 
 app.post('/webhook', async (req, res) => {
 
-  let { exchange, passphrase, quantity = 0, side = 'buy', ticker, capital = 0 } = req.body
+  let { exchange, passphrase, quantity = 0, side = 'buy', ticker } = req.body
 
   // Validation
   if (exchange != 'BINANCE') {
@@ -30,14 +32,14 @@ app.post('/webhook', async (req, res) => {
     return
   }
 
-  console.info(`Sending order : Market - ${side} ${quantity} ${ticker}`)
-
   // Buy
   if (side == 'buy') {
     try {
-      const result = await binance.marketBuy(ticker, quantity)
+      console.info(`Sending order : Market Buy - ${ticker} ${quantity}`)
+      await binance.marketBuy(ticker, quantity)
       res.json({ 'code': 'success', 'message': 'order executed' })
     } catch (err) {
+      console.error(`Error : ${err}`)
       res.json({ 'code': 'error', 'message': err.body })
     }
   }
@@ -45,12 +47,16 @@ app.post('/webhook', async (req, res) => {
   // Sell
   if (side == 'sell') {
     try {
-      const result = await binance.marketSell(ticker, quantity)
+      console.info(`Sending order : Market Sell - ${ticker} ${quantity}`)
+      await binance.marketSell(ticker, quantity)
       res.json({ 'code': 'success', 'message': 'order executed' })
     } catch (err) {
+      console.error(`Error : ${err}`)
       res.json({ 'code': 'error', 'message': err.body })
     }
   }
+
+  hook.send(`Sending order : Market ${side} - ${ticker} ${quantity}`)
 
 })
 
