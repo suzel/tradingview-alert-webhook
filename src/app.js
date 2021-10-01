@@ -17,6 +17,8 @@ const binance = new Binance().options({
 
 const hook = new Webhook(process.env.DISCORD_WEBHOOK_URL)
 
+app.get('/health', async (req, res) => res.json({'status':'UP'}))
+
 app.post('/webhook', async (req, res) => {
 
   let { exchange, passphrase, quantity = 0, side = 'buy', ticker } = req.body
