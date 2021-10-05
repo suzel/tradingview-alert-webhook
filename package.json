@@ -18,6 +18,9 @@
     "vscode": ">=7.24.1"
   },
   "scripts": {
+    "dev": "nodemon src/app.js localhost 3000",
+    "format": "prettier -w src",
+    "lint": "eslint --fix src/app.js",
     "start": "node src/app.js"
   },
   "dependencies": {
@@ -28,6 +31,13 @@
     "node-binance-api": "^0.13.0"
   },
   "devDependencies": {
-    "eslint": "^7.32.0"
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-prettier": "^4.0.0",
+    "lint-staged": "^11.2.0",
+    "nodemon": "^2.0.13",
+    "prettier": "^2.4.1"
   }
 }
