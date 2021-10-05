@@ -41,6 +41,7 @@ app.post('/webhook', async (req, res) => {
       res.json({ code: 'success', message: 'order executed' })
     } catch (err) {
       console.error(`Error : ${err}`)
+      hook.send(`Error : ${err.body}`)
       res.json({ code: 'error', message: err.body })
     }
   }
@@ -53,6 +54,7 @@ app.post('/webhook', async (req, res) => {
       res.json({ code: 'success', message: 'order executed' })
     } catch (err) {
       console.error(`Error : ${err}`)
+      hook.send(`Error : ${err.body}`)
       res.json({ code: 'error', message: err.body })
     }
   }
