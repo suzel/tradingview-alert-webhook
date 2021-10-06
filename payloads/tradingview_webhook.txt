@@ -1,11 +1,8 @@
 {
-    "passphrase": "suzel",
+    "passphrase": "abcdefgh",
     "time": "{{timenow}}",
     "exchange": "{{exchange}}",
-    "side": "{{action}}",
     "ticker": "{{ticker}}",
-    "quantity": {{quantity}},
-    "capital": {{capital}},
     "bar": {
         "time": "{{time}}",
         "open": {{open}},

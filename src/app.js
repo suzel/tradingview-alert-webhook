@@ -33,6 +33,8 @@ app.post('/webhook', async (req, res) => {
     return
   }
 
+  hook.send(`Sending order : Market ${side} - ${ticker} ${quantity}`)
+
   // Buy
   if (side === 'buy') {
     try {
@@ -58,8 +60,6 @@ app.post('/webhook', async (req, res) => {
       res.json({ code: 'error', message: err.body })
     }
   }
-
-  hook.send(`Sending order : Market ${side} - ${ticker} ${quantity}`)
 })
 
 app.listen(port, () => console.log(`App listening at http://localhost:${port}`))
