@@ -4,6 +4,7 @@
     "esbenp.prettier-vscode",
     "EditorConfig.editorconfig",
     "ex-codes.pine-script-syntax-highlighter",
+    "humao.rest-client",
     "mikestead.dotenv",
     "sandy081.todotasks"
   ]
