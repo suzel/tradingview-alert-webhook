@@ -1,6 +1,7 @@
 @baseUrl = tradingview.sukruuzel.com
 @contentType = application/json
-@passphrase = {{$processEnv WEBHOOK_PASSPHRASE}}
+@passphrase = suzel
+@ticker = SOLUSDT
 
 ###
 
@@ -14,7 +15,7 @@ Content-Type: {{contentType}}
   "time": "{{$timestamp}}",
   "exchange": "BINANCE",
   "side": "buy",
-  "ticker": "ROSEUSDT",
+  "ticker": "{{ticker}}",
   "price": 20
 }
 
@@ -30,5 +31,5 @@ Content-Type: {{contentType}}
   "time": "{{$timestamp}}",
   "exchange": "BINANCE",
   "side": "sell",
-  "ticker": "ROSEUSDT"
+  "ticker": "{{ticker}}"
 }

@@ -57,7 +57,7 @@ app.post('/webhook', async (req, res) => {
         qty = binance.roundStep(qty, mins[ticker].stepSize)
       }
       console.info(`Sending order : Market Buy - ${ticker} ${qty}`)
-      hook.send(`Sending order : Market ${side} - ${ticker} ${quantity}`)
+      hook.send(`Sending order : Market ${side} - ${ticker} ${qty}`)
       await binance.marketBuy(ticker, qty)
       res.json({ code: 'success', message: 'order executed' })
     } catch (err) {
@@ -72,7 +72,7 @@ app.post('/webhook', async (req, res) => {
     try {
       const qty = app.locals.balances[ticker.replace('USDT', '')].available
       console.info(`Sending order : Market Sell - ${ticker} ${qty}`)
-      hook.send(`Sending order : Market ${side} - ${ticker} ${quantity}`)
+      hook.send(`Sending order : Market ${side} - ${ticker} ${qty}`)
       await binance.marketSell(ticker, qty)
       res.json({ code: 'success', message: 'order executed' })
     } catch (err) {
