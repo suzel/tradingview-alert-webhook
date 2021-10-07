@@ -13,10 +13,10 @@ TradingView Strategy Alert Webhook that buys and sells crypto with the Binance A
 ```json
 {
   "passphrase": "suzel",
-  "time": "",
-  "exchange": "BINANCE",
+  "time": "{{timenow}}",
+  "exchange": "{{exchange}}",
+  "ticker": "{{ticker}}",
   "side": "buy",
-  "ticker": "ROSEUSDT",
   "price": 20
 }
 ```
@@ -26,10 +26,10 @@ TradingView Strategy Alert Webhook that buys and sells crypto with the Binance A
 ```json
 {
   "passphrase": "suzel",
-  "time": "",
-  "exchange": "BINANCE",
-  "side": "sell",
-  "ticker": "ROSEUSDT"
+  "time": "{{timenow}}",
+  "exchange": "{{exchange}}",
+  "ticker": "{{ticker}}",
+  "side": "sell"
 }
 ```
 
