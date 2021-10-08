@@ -1,5 +1,5 @@
 Development:
   ☐ TDA API Integration
-  ☐ Husky, Link Staged, Prettier configs
-  ☐ ESLint problem
-  ☐ Nodejs restart problem (Nodemon)
+  ☐ Logging
+  ☐ Binance file
+  ☐ Step Size Problem (https://api.binance.com/api/v3/exchangeInfo?symbol=BNBBTC)

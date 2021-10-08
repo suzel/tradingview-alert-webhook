@@ -1,7 +1,7 @@
 @baseUrl = tradingview.sukruuzel.com
 @contentType = application/json
 @passphrase = suzel
-@ticker = SOLUSDT
+@ticker = ROSEUSDT
 
 ###
 

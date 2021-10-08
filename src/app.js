@@ -70,7 +70,8 @@ app.post('/webhook', async (req, res) => {
   // Sell
   if (side === 'sell') {
     try {
-      const qty = app.locals.balances[ticker.replace('USDT', '')].available
+      const qty = app.locals.balances[ticker.substring(0, 3)].available
+      // qty = binance.roundStep(qty, mins[ticker].stepSize)
       console.info(`Sending order : Market Sell - ${ticker} ${qty}`)
       hook.send(`Sending order : Market ${side} - ${ticker} ${qty}`)
       await binance.marketSell(ticker, qty)
