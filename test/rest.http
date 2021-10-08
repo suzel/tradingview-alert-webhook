@@ -1,7 +1,7 @@
 @baseUrl = tradingview.sukruuzel.com
 @contentType = application/json
 @passphrase = suzel
-@ticker = ROSEUSDT
+@ticker = UNIUSDT
 
 ###
 
@@ -16,7 +16,7 @@ Content-Type: {{contentType}}
   "exchange": "BINANCE",
   "side": "buy",
   "ticker": "{{ticker}}",
-  "price": 20
+  "price": 15
 }
 
 ###

@@ -1,0 +1,655 @@
+//-------------------------------------------------------------------------------------------------------
+
+//@version=4
+// Profit Tracker Indicator v1.0
+// Created by Suzel
+// www.sukruuzel.com
+
+study("Profit Tracker", overlay=true)
+
+// Make inputs that set the take profit % (optional)
+FastPeriod = input(title="Fast MA Period", type=input.integer, defval=20, minval=1, group="Moving Average")
+SlowPeriod = input(title="Slow MA Period", type=input.integer, defval=50, minval=1, group="Moving Average")
+TPPerc = input(title="Long Take Profit (%)", type=input.float, defval=2, minval=0.0, step=0.1, group="TP & SL")
+// TP2Perc = input(title="Long Take Profit (%)", type=input.float, defval=4, minval=0.0, step=0.1, group="TP & SL")
+// SLPerc = input(title="Long Stop Loss (%)", type=input.float, defval=2, minval=0.0, step=0.1, group="TP & SL")
+// TPRatio = input(title="Sell Position Size % @TP", type=input.float, defval=50, step=1, group="TP & SL", tooltip="Example: 50 closing 50% of the position once TP1 is reached")
+
+// Calculate moving averages
+fastEMA = ema(close, FastPeriod)
+slowEMA = ema(close, SlowPeriod)
+
+// Calculate trading conditions
+longCondition = fastEMA > slowEMA // crossover(fastEMA, slowEMA)
+shortCondition = fastEMA < slowEMA // crossunder(fastEMA, slowEMA)
+
+// Plot moving averages
+plot(series=fastEMA, title="Fast MA", color=color.green, linewidth=2)
+plot(series=slowEMA, title="Slow MA", color=color.maroon, linewidth=2)
+plotshape(longCondition, style=shape.triangleup, location=location.belowbar, text="buy", color=color.lime)
+plotshape(shortCondition, style=shape.triangledown, location=location.abovebar, text="sell", color=color.red)
+
+//-------------------------------------------------------------------------------------------------------
+
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © piriya33
+// Added Labels and alert conditions and other quality of life feature
+// Updated compatability with pine script v4
+// Based on improvements from "Kitti-Playbook Action Zone V.4.2.0.3 for Stock Market"
+
+//@version=4
+study("CDC ActionZone V3 2020", overlay=true, precision=6)
+//****************************************************************************//
+// CDC Action Zone is based on a simple EMA crossover
+// between [default] EMA12 and EMA26
+// The zones are defined by the relative position of
+// price in relation to the two EMA lines
+// Different zones can be use to activate / deactivate
+// other trading strategies
+// The strategy can also be used on its own with
+// acceptable result, buy on the first green candle
+// and sell on the first red candle
+//****************************************************************************//
+//****************************************************************************//
+// Define User Input Variables
+
+xsrc = input(title="Source Data",type=input.source, defval=close)
+xprd1 = input(title="Fast EMA period", type=input.integer, defval=12)
+xprd2 = input(title="Slow EMA period", type=input.integer, defval=26)
+xsmooth = input(title="Smoothing period (1 = no smoothing)", type=input.integer, defval=1)
+fillSW = input(title="Paint Bar Colors", type=input.bool, defval=true)
+fastSW = input(title="Show fast moving average line", type=input.bool, defval=true)
+slowSW = input(title="Show slow moving average line", type=input.bool, defval=true)
+labelSwitch =  input(title="Turn on assistive text", type=input.bool, defval=true)
+plotSigsw = input(title="Plot Buy/Sell Signals? ", type=input.bool, defval=true)
+plotRibsw = input(title="Plot Buy/Sell Ribbon", type=input.bool, defval=false)
+plotRibbonPos = input(title="Ribbon Position", options=["Top", "Bottom"], defval="Top")
+
+xfixtf = input(title="** Use Fixed time frame Mode (advanced) **", type=input.bool, defval=false)
+xtf = input(title="** Fix chart to which time frame ? **)", type=input.resolution, defval="D")
+
+plotSig2sw = input(title="Plot momentum based Buy/Sell Signals? ", type=input.bool, defval=false)
+plotSig2lv = input(title="Set signal threshold (higher = stricter)", type=input.integer, defval=1, minval=0, maxval=1)
+
+//****************************************************************************//
+//Calculate Indicators
+
+xPrice = ema(xsrc,xsmooth)
+FastMA = xfixtf ?
+     ema(security(syminfo.tickerid, xtf, ema(xsrc,xprd1),
+         gaps = barmerge.gaps_off, lookahead = barmerge.lookahead_on), xsmooth)
+     :
+     ema(xPrice,xprd1)
+SlowMA = xfixtf ?
+     ema(security(syminfo.tickerid, xtf, ema(xsrc,xprd2),
+         gaps = barmerge.gaps_off, lookahead = barmerge.lookahead_on), xsmooth)
+     :
+     ema(xPrice,xprd2)
+
+Bull = FastMA > SlowMA
+Bear = FastMA < SlowMA
+
+//****************************************************************************//
+// Define Color Zones
+
+Green = Bull and xPrice>FastMA // Buy
+Blue = Bear and xPrice>FastMA and xPrice>SlowMA //Pre Buy 2
+LBlue = Bear and xPrice>FastMA and xPrice<SlowMA //Pre Buy 1
+
+Red = Bear and xPrice < FastMA // Sell
+Orange = Bull and xPrice < FastMA and xPrice < SlowMA // Pre Sell 2
+Yellow = Bull and xPrice < FastMA and xPrice > SlowMA // Pre Sell 1
+
+//****************************************************************************//
+// Display color on chart
+
+
+bColor = Green ? color.green :
+     Blue ? color.blue :
+     LBlue ? color.aqua :
+     Red ? color.red :
+     Orange ? color.orange :
+     Yellow ? color.yellow :
+     color.black
+barcolor(color=fillSW? bColor : na)
+
+//****************************************************************************//
+// Display MA lines
+
+FastL = plot(fastSW ? FastMA : na,"Fast EMA",color=color.red)
+SlowL = plot(slowSW ? SlowMA : na,"Slow EMA",color=color.blue)
+fillcolor = Bull ? color.green : Bear ? color.red : color.black
+fill(FastL,SlowL,fillcolor)
+
+//****************************************************************************//
+// Define Buy and Sell condition
+// This is only for thebasic usage of CDC Actionzone (EMA Crossover)
+// ie. Buy on first green bar and sell on first red bar
+
+buycond = Green and Green[1]==0
+sellcond = Red and Red[1]==0
+
+bullish = barssince(buycond) < barssince(sellcond)
+bearish = barssince(sellcond) < barssince(buycond)
+
+buy= bearish[1]and buycond
+sell= bullish[1] and sellcond
+
+bColor_BullBear = bullish ? color.green : bearish ? color.red : color.black
+
+//****************************************************************************//
+// Plot Buy and Sell point on chart
+
+plotshape(plotSigsw ? buy : na,
+     style=shape.circle,
+     title = "Buy Signal",
+     location = location.belowbar,
+     color = color.green)
+plotshape(plotSigsw ? sell : na,
+     style=shape.circle,
+     title = "Sell Signal",
+     location=location.abovebar,
+     color = color.red)
+
+// Display Buy/Sell Ribbon
+
+
+plotshape(plotRibsw ? plotRibbonPos == "Top" ? close : na : na,
+     style=shape.square,
+     title = "Buy/Sell Ribbon",
+     location = location.top,
+     color = bColor_BullBear)
+
+plotshape(plotRibsw ? plotRibbonPos == "Bottom" ? close : na : na,
+     style=shape.square,
+     title = "Buy/Sell Ribbon",
+     location = location.bottom,
+     color = bColor_BullBear)
+
+
+//****************************************************************************//
+// Label
+
+labelstyle = close>SlowMA ? label.style_labeldown : label.style_labelup
+labelyloc = close>SlowMA ? yloc.abovebar : yloc.belowbar
+labeltcolor = buy? color.black :
+     sell ? color.white :
+     close > close[1] ? color.green :
+     color.red
+labelbgcolor = buy ? color.green : sell ? color.red : color.silver
+labeltext = buy ? "BUY next bar\n" : sell ? "SELL next bar\n" : " "
+trendText = bullish ? "bullish" : bearish ? "bearish" : "sideways"
+
+
+l1 = label.new(bar_index,na,
+     text=labeltext+syminfo.ticker + " "+tostring(close) + " " + syminfo.currency + "\n currently in a " + trendText + " trend \n" ,
+     color = labelbgcolor,
+     textcolor=labeltcolor,
+     yloc=labelyloc,
+     style=labelstyle)
+
+label.delete(labelSwitch ? l1[1] : l1)
+
+// Momentum Signal using StochRSI
+
+// Adds a momentum based signal following trends to the script
+// Default is hidden, only use with caution
+// Parameters for STOCH RSI is hard-coded to avoid cluttering the input screen further
+// If you need to change anything, make a copy of the code and change it.
+// Inputs are commented out, to enable them comment out the hard coded variables first!
+
+// fixed inputs //
+
+smoothK = 3
+smoothD = 3
+RSIlen = 14
+STOlen = 14
+SRsrc = close
+OSlevel = 30
+OBlevel = 70
+
+// User inputs // // COMMENT ABOVE VARIABLES FIRST!!
+
+// smoothK = input(3,"StochRSI smooth K",type=input.integer,minval=1)
+// smoothD = input(3,"StochRSI smooth D",type=input.integer,minval=1)
+// RSIlen = input(14,"RSI length",type=input.integer,minval=1)
+// STOlen = input(14,"Stochastic length",type=input.integer,minval=1)
+// SRsrc = input(close,"Source for StochasticRSI",type=input.source)
+// OSlevel = input(30,"Oversold Threshold",type=input.float,minval=0.00)
+// OBlevel = input(70,"Oversold Threshold",type=input.float,minval=0.00)
+
+// calculations //
+rsi1 = rsi(SRsrc,RSIlen)
+k = sma(stoch(rsi1,rsi1,rsi1,STOlen),smoothK)
+d = sma(k,smoothD)
+
+// storsiBuySig =  if bullish
+//     if (d < OSlevel and crossover(k,d))
+//         3
+//     else if crossover(k,OSlevel)
+//         2
+//     else if d > OSlevel and crossover(k,d)
+//         1
+//     else
+//         0
+// else
+//     0
+
+storsiBuySig = iff(bullish,
+                     iff(d < OSlevel and crossover(k,d),
+                         2,
+                         iff(d > OSlevel and crossover(k,d),
+                             1,
+                             0)),
+                     0)
+
+storsiSellSig = iff(bearish,
+                     iff(d > OBlevel and crossunder(k,d),
+                         2,
+                         iff(d < OBlevel and crossunder(k,d),
+                             1,
+                             0)),
+                     0)
+
+plotshape(plotSig2sw ? storsiBuySig > plotSig2lv ? storsiBuySig : na : na,
+     "Buy more signals", style=shape.triangleup,
+     location=location.belowbar, color = color.teal)
+plotshape(plotSig2sw ? storsiSellSig > plotSig2lv ? storsiSellSig : na : na,
+     "Sell more signals", style=shape.triangledown,
+     location=location.abovebar, color = color.orange)
+
+
+//****************************************************************************//
+// Alert conditions
+
+alertcondition(buy,
+     title="*Buy Alert",
+     message= "Buy {{exchange}}:{{ticker}}")
+
+alertcondition(sell,
+     title="*Sell Alert",
+     message= "Sell {{exchange}}:{{ticker}}")
+
+alertcondition(bullish,
+     title="is Bullish")
+
+alertcondition(bearish,
+     title="is Bearish")
+
+alertcondition(Green,
+     title="is Green")
+
+alertcondition(Blue,
+     title="is Blue (Strong Rally)")
+
+alertcondition(LBlue,
+     title="is Light Blue (Rally)")
+
+alertcondition(Red,
+     title="is Red")
+
+alertcondition(Orange,
+     title="is Orange (Strong Dip)")
+
+alertcondition(Yellow,
+     title="is Yellow (Dip)")
+
+
+//****************************************************************************//
+
+//-------------------------------------------------------------------------------------------------------
+
+//@version=4
+study("2 ema crossover",overlay=true)
+
+buy = crossover(ema(close,9),ema(close,20))
+sell = crossunder(ema(close,9),ema(close,20))
+
+tp = 280
+sl = 200
+
+buy_tp_price = 0.0
+buy_sl_price = 0.0
+
+buy_tp_price := buy? close+tp*syminfo.mintick : na
+buy_sl_price := buy? close-sl*syminfo.mintick : na
+
+buy_exit1 = high>buy_tp_price
+buy_exit2 = low<buy_sl_price
+
+alertcondition(buy,"Buy 101")
+alertcondition(sell,"Sell 101")
+
+plot(ema(close,9),color=color.green)
+plot(ema(close,20),color=color.red)
+
+plotshape(buy,style=shape.triangleup,location=location.belowbar,text='buy',color=color.blue)
+plotshape(sell,style=shape.triangledown,location=location.abovebar,text='sell',color=color.red)
+
+plot(buy_tp_price)
+plot(buy_sl_price)
+
+plotshape(buy_exit2,style=shape.triangledown,location=location.abovebar,text='exit loss',color=color.purple)
+plotshape(buy_exit1,style=shape.triangledown,location=location.abovebar,text='exit profit',color=color.purple)
+
+
+//-------------------------------------------------------------------------------------------------------
+
+//@version=4
+study("教學：尋找高低點4", overlay=true)
+
+// 尋找高低點4：完善前一個程式，除了顯示高點，也顯示低點
+// highest、lowest的使用，但是讓使用者可以自行變更初始值，再加上低點顯示
+
+barnum = input(title="左右K棒數", defval=4, type=input.integer, minval=2)
+cond = high[barnum] == highest(high, barnum*2+1)
+cond2= low[barnum]  == lowest(low, barnum*2+1)
+
+//plotchar(cond, char="*", text="H", location=location.abovebar, offset=-barnum)
+//plotchar(cond2, char="*", text="L", location=location.belowbar, offset=-barnum)
+
+
+if cond
+    labelh = label.new(x=bar_index-barnum, y=na, text="H",
+             size=size.normal, color=#EEEEEE, textcolor=color.red, yloc=yloc.abovebar,
+             style=label.style_label_down
+             )
+
+if cond2
+    lablel = label.new(x=bar_index-barnum, y=na, text="L",
+             size=size.normal, color=#EEEEEE, textcolor=color.green, yloc=yloc.belowbar, style=label.style_label_up
+             )
+
+//-------------------------------------------------------------------------------------------------------
+
+//@version=3
+
+study("[ALERTS] MA Cross Twelve", overlay=true)
+
+// MA - type, source, length
+
+//  SMA --> Simple
+//  EMA --> Exponential
+//  WMA --> Weighted
+//  VWMA --> Volume Weighted
+//  SMMA --> Smoothed
+//  DEMA --> Double Exponential
+//  TEMA --> Triple Exponential
+//  HMA --> Hull
+//  TMA --> Triangular
+//  SSMA --> SuperSmoother filter
+//  ZEMA --> Zero Lag Exponential
+//  JMA --> Jurik
+
+type = input(defval="DEMA", title="MA Type: ", options=["SMA", "EMA", "WMA", "VWMA", "SMMA", "DEMA", "TEMA", "HullMA", "ZEMA", "TMA", "SSMA", "JMA"], type=string)
+len1 = input(defval=8, title="Fast MA Length", minval=1)
+srcclose1 = input(close, "Fast MA Source", type = source)
+len2 = input(defval=21, title="Slow MA Length", minval=1)
+srcclose2 = input(open, "Slow MA Source", type = source)
+pow = input(3, "Pow for Jurik's MA")
+// Returns MA input selection variant, default to SMA if blank or typo.
+
+variant(type, src, len, p) =>
+    v1 = sma(src, len)                                                  // Simple
+    v2 = ema(src, len)                                                  // Exponential
+    v3 = wma(src, len)                                                  // Weighted
+    v4 = vwma(src, len)                                                 // Volume Weighted
+    v5 = 0.0
+    v5 := na(v5[1]) ? sma(src, len) : (v5[1] * (len - 1) + src) / len    // Smoothed
+    v6 = 2 * v2 - ema(v2, len)                                          // Double Exponential
+    v7 = 3 * (v2 - ema(v2, len)) + ema(ema(v2, len), len)               // Triple Exponential
+    v8 = wma(2 * wma(src, len / 2) - wma(src, len), round(sqrt(len)))   // Hull
+    v11 = sma(sma(src,len),len)                                         // Triangular
+    // SuperSmoother filter
+    // © 2013  John F. Ehlers
+    a1 = exp(-1.414*3.14159 / len)
+    b1 = 2*a1*cos(1.414*3.14159 / len)
+    c2 = b1
+    c3 = (-a1)*a1
+    c1 = 1 - c2 - c3
+    v9 = 0.0
+    v9 := c1*(src + nz(src[1])) / 2 + c2*nz(v9[1]) + c3*nz(v9[2])
+    // Zero Lag Exponential
+    xLag = (len - 1) / 2
+    xEMAData = (src + (src - src[xLag]))
+    v10 = ema(xEMAData, len)
+    // Jurik's MA
+    beta = 0.45*(len-1)/(0.45*(len-1)+2)
+    alpha = pow(beta, p)
+    L0=0.0, L1=0.0, L2=0.0, L3=0.0, v12=0.0
+    L0 := (1-alpha)*src + alpha*nz(L0[1])
+    L1 := (src - L0[0])*(1-beta) + beta*nz(L1[1])
+    L2 := L0[0] + L1[0]
+    L3 := (L2[0] - nz(v12[1]))*((1-alpha)*(1-alpha)) + (alpha*alpha)*nz(L3[1])
+    v12 := nz(v12[1]) + L3[0]
+    v12
+	// return variant, defaults to SMA if input invalid.
+    type=="EMA"?v2 : type=="WMA"?v3 : type=="VWMA"?v4 : type=="SMMA"?v5 : type=="DEMA"?v6 : type=="TEMA"?v7 : type=="HullMA"?v8 : type=="SSMA"?v9 : type=="ZEMA"?v10 : type=="TMA"? v11: type=="JMA"? v12 : v1
+
+ma_1 = variant(type, srcclose1, len1, pow)
+ma_2 = variant(type, srcclose2, len2, pow)
+
+plot(ma_1, title="Fast MA", color = green, linewidth=2, transp=0)
+plot(ma_2, title="Slow MA", color = maroon, linewidth=2, transp=0)
+
+longCond = na
+shortCond = na
+longCond := ma_1 > ma_2
+shortCond := ma_1 < ma_2
+
+// Count your long short conditions for more control with Pyramiding
+
+sectionLongs = 0
+sectionLongs := nz(sectionLongs[1])
+sectionShorts = 0
+sectionShorts := nz(sectionShorts[1])
+
+if longCond
+    sectionLongs := sectionLongs + 1
+    sectionShorts := 0
+
+if shortCond
+    sectionLongs := 0
+    sectionShorts := sectionShorts + 1
+
+// Pyramiding Inputs
+
+pyrl = input(1, "Pyramiding", type = integer)
+
+// These check to see your signal and cross references it against the pyramiding settings above
+
+longCondition = longCond and sectionLongs <= pyrl
+shortCondition = shortCond and sectionShorts <= pyrl
+
+// Get the price of the last opened long or short
+
+last_open_longCondition = na
+last_open_shortCondition = na
+last_open_longCondition := longCondition ? high[1] : nz(last_open_longCondition[1])
+last_open_shortCondition := shortCondition ? low[1] : nz(last_open_shortCondition[1])
+
+// Check if your last postion was a long or a short
+
+last_longCondition = na
+last_shortCondition = na
+last_longCondition := longCondition ? time : nz(last_longCondition[1])
+last_shortCondition := shortCondition ? time : nz(last_shortCondition[1])
+
+in_longCondition = last_longCondition > last_shortCondition
+in_shortCondition = last_shortCondition > last_longCondition
+
+// Take profit
+
+isTPl = input(true, "Take Profit Long")
+isTPs = input(true, "Take Profit Short")
+tpl = input(15, "Take Profit Long %", type=float)
+tps = input(30, "Take Profit Short %", type=float)
+long_tp = isTPl and crossover(high, (1+(tpl/100))*last_open_longCondition) and in_longCondition  == 1
+short_tp = isTPs and crossunder(low, (1-(tps/100))*last_open_shortCondition) and in_shortCondition == 1
+
+// Stop Loss
+
+isSLl = input(true, "Stop Loss Long")
+isSLs = input(false, "Stop Loss Short")
+sl= 0.0
+sl := input(3, "Stop Loss %", type=float)
+long_sl = isSLl and crossunder(low, (1-(sl/100))*last_open_longCondition) and longCondition == 0 and in_longCondition == 1
+short_sl = isSLs and crossover(high, (1+(sl/100))*last_open_shortCondition) and shortCondition == 0 and in_shortCondition == 1
+
+// Create a single close for all the different closing conditions.
+
+long_close = long_tp or long_sl ? 1 : 0
+short_close = short_tp or short_sl ? 1 : 0
+
+// Get the time of the last close
+
+last_long_close = na
+last_short_close = na
+last_long_close := long_close ? time : nz(last_long_close[1])
+last_short_close := short_close ? time : nz(last_short_close[1])
+
+// Alerts & Signals
+
+bton(b) => b ? 1 : 0
+
+plotshape(longCondition, title = "Buy Signal", style=shape.triangleup, location=location.belowbar, color = lime, transp = 0)
+plotshape(shortCondition, title = "Sell Signal", style=shape.triangledown, location=location.abovebar, color = red, transp = 0)
+
+plotshape(long_tp and last_longCondition > nz(last_long_close[1]), text ="TP", title="Take Profit Long", style=shape.triangledown,
+   location=location.abovebar, color = red, editable = false, transp = 0)
+plotshape(short_tp and last_shortCondition > nz(last_short_close[1]) , text ="TP", title="Take Profit Short", style=shape.triangleup,
+   location=location.belowbar, color = lime, editable = false, transp = 0)
+
+ltp = iff(long_tp and last_longCondition > nz(last_long_close[1]), (1+(tpl/100))*last_open_longCondition, na)
+plot(ltp, style=cross, linewidth=3, color = white, editable = false)
+stp = iff(short_tp and last_shortCondition > nz(last_short_close[1]), (1-(tps/100))*last_open_shortCondition, na)
+plot(stp, style = cross, linewidth=3, color = white, editable = false)
+
+plotshape(long_sl and last_longCondition > nz(last_long_close[1]), text ="SL", title="Stop Loss Long", style=shape.triangledown,
+   location=location.abovebar, color = red, editable = false, transp = 0)
+plotshape(short_sl and last_shortCondition > nz(last_short_close[1]), text ="SL", title="Stop Loss Short", style=shape.triangleup,
+   location=location.belowbar, color = lime, editable = false, transp = 0)
+
+lsl = iff(long_sl and last_longCondition > nz(last_long_close[1]), (1-(sl/100))*last_open_longCondition, na)
+plot(lsl, style=cross, linewidth=3, color = white, editable = false)
+ssl = iff(short_sl and last_shortCondition > nz(last_short_close[1]), (1+(sl/100))*last_open_shortCondition, na)
+plot(ssl, style = cross, linewidth=3, color = white, editable = false)
+plotshape(longCondition[1]==1, title= "Long Alert Completed", location=location.bottom, color=green, transp=0, style=shape.circle, size=size.auto, offset=-1)
+plotshape(shortCondition[1]==1, title= "Short Alert Completed", location=location.top, color=red, transp=0, style=shape.circle, size=size.auto, offset=-1)
+
+alertcondition(bton(longCondition), title="Buy Alert",
+   message = "BUY")
+
+alertcondition(bton(shortCondition or (long_tp and high > close and last_longCondition > nz(last_long_close[1]))), title="Sell Alert",
+   message = "SELL")
+
+alertcondition(bton((long_tp and high > close and last_longCondition > nz(last_long_close[1])) or
+   (long_sl and last_longCondition > nz(last_long_close[1]))), title="TP/SL Sell Alert",
+   message = "TP/SL SELL")
+
+alertcondition(bton((short_tp and low < close and last_shortCondition > nz(last_short_close[1])) or
+   (short_sl and last_shortCondition > nz(last_short_close[1]))), title="TP/SL Buy Alert",
+   message = "TP/SL BUY")
+
+
+//-------------------------------------------------------------------------------------------------------
+
+//@version=4
+strategy("Doge SMA", overlay=true, initial_capital=25, default_qty_type=strategy.percent_of_equity, default_qty_value=100)
+
+start_date = input(title="Start Date", type=input.integer, defval=4, minval=1, maxval=31)
+start_month = input(title="Start Month", type=input.integer, defval=9, minval=1, maxval=12)
+start_year = input(title="Start Year", type=input.integer, defval=2020)
+end_date = input(title="End Date", type=input.integer, defval=6, minval=1, maxval=31)
+end_month = input(title="End Month", type=input.integer, defval=9, minval=1, maxval=12)
+end_year = input(title="End Year", type=input.integer, defval=2020)
+
+between_dates = (time >= timestamp(start_year, start_month, start_date, 7, 0)) and (time < timestamp(end_year, end_month, end_date, 23, 59))
+
+fast_ma_period = input(title="Fast MA", type=input.integer, defval=2)
+slow_ma_period = input(title="Slow MA", type=input.integer, defval=5)
+
+fast_ma = sma(close, fast_ma_period)
+slow_ma = sma(close, slow_ma_period)
+
+plot(fast_ma, color=color.green, linewidth=1)
+plot(slow_ma, color=color.yellow, linewidth=3)
+
+buy_condition = crossover(fast_ma, slow_ma)
+sell_condition = crossunder(fast_ma, slow_ma)
+
+if between_dates
+    strategy.entry("doge door", strategy.long, when=buy_condition)
+
+strategy.close("doge door",  when=sell_condition)
+
+//-------------------------------------------------------------------------------------------------------
+
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © adolgov
+
+// @description
+//
+
+//@version=4
+strategy("Stop loss and Take Profit in $$ example", overlay=true)
+
+// random entry condition
+
+longCondition = crossover(sma(close, 14), sma(close, 28))
+if (longCondition)
+    strategy.entry("My Long Entry Id", strategy.long)
+
+shortCondition = crossunder(sma(close, 14), sma(close, 28))
+if (shortCondition)
+    strategy.entry("My Short Entry Id", strategy.short)
+
+moneyToSLPoints(money) =>
+    strategy.position_size !=0 ? (money / syminfo.pointvalue / abs(strategy.position_size)) / syminfo.mintick : na
+
+p = moneyToSLPoints(input(200, title = "Take Profit $$"))
+l = moneyToSLPoints(input(100, title = "Stop Loss $$"))
+strategy.exit("x", profit = p, loss = l)
+
+// debug plots for visualize SL & TP levels
+pointsToPrice(pp) =>
+    na(pp) ? na : strategy.position_avg_price + pp * sign(strategy.position_size) * syminfo.mintick
+
+pp = plot(pointsToPrice(p), style = plot.style_linebr )
+lp = plot(pointsToPrice(-l), style = plot.style_linebr )
+avg = plot( strategy.position_avg_price, style = plot.style_linebr )
+fill(pp, avg, color = color.green)
+fill(avg, lp, color = color.red)
+
+
+//-------------------------------------------------------------------------------------------------------
+
+
+
+// Alerts
+//if crossOver
+//  alert("We have an MA cross over on " + syminfo.ticker + ", current price: " + tostring(close), alert.freq_once_per_bar_close)
+//if crossUnder
+//  alert("We have an MA cross under on " + syminfo.ticker + ", current price: " + tostring(close), alert.freq_once_per_bar_close)
+
+// Submit entry orders
+//if longCondition
+//    strategy.entry("Long", strategy.long)
+
+//if strategy.position_size > 0
+//    strategy.exit("TP1", from_entry="Long", qty = initial_position_size * TPRatio, limit = TP, stop = SL)
+    // strategy.exit("TP2", from_entry="Long", limit = TP2, stop = SL)
+
+
+
+    percentAsPoints(pcnt) =>
+    strategy.position_size != 0 ? round(pcnt / 100.0 * strategy.position_avg_price / syminfo.mintick) : float(na)
+
+percentAsPrice(pcnt) =>
+    strategy.position_size != 0 ? ((pcnt / 100.0) + 1.0) * strategy.position_avg_price : float(na)
+
+current_position_size = abs(strategy.position_size)
+initial_position_size = abs(valuewhen(strategy.position_size[1] == 0.0, strategy.position_size, 0))
+
+TP = strategy.position_avg_price + percentAsPoints(TPPerc) * syminfo.mintick * strategy.position_size / abs(strategy.position_size)
+SL = strategy.position_avg_price - percentAsPoints(SLPerc) * syminfo.mintick * strategy.position_size / abs(strategy.position_size)
