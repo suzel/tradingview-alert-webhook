@@ -1,5 +1,5 @@
 {
-    "passphrase": "abcdefgh",
+    "passphrase": "suzel",
     "time": "{{timenow}}",
     "exchange": "{{exchange}}",
     "ticker": "{{ticker}}",

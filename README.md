@@ -8,28 +8,31 @@ TradingView Strategy Alert Webhook that buys and sells crypto with the Binance A
 
 ## Payload
 
-### Buy
-
 ```json
 {
-  "passphrase": "suzel",
-  "time": "{{timenow}}",
-  "exchange": "{{exchange}}",
-  "ticker": "{{ticker}}",
-  "side": "buy",
-  "price": 20
-}
-```
-
-### Sell
-
-```json
-{
-  "passphrase": "suzel",
-  "time": "{{timenow}}",
-  "exchange": "{{exchange}}",
-  "ticker": "{{ticker}}",
-  "side": "sell"
+    "passphrase": "suzel",
+    "time": "{{timenow}}",
+    "exchange": "{{exchange}}",
+    "ticker": "{{ticker}}",
+    "bar": {
+        "time": "{{time}}",
+        "open": {{open}},
+        "high": {{high}},
+        "low": {{low}},
+        "close": {{close}},
+        "volume": {{volume}}
+    },
+    "strategy": {
+        "position_size": {{strategy.position_size}},
+        "order_action": "{{strategy.order.action}}",
+        "order_contracts": {{strategy.order.contracts}},
+        "order_price": {{strategy.order.price}},
+        "order_id": "{{strategy.order.id}}",
+        "market_position": "{{strategy.market_position}}",
+        "market_position_size": {{strategy.market_position_size}},
+        "prev_market_position": "{{strategy.prev_market_position}}",
+        "prev_market_position_size": {{strategy.prev_market_position_size}}
+    }
 }
 ```
 

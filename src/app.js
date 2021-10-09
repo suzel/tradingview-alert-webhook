@@ -3,7 +3,7 @@ require('dotenv').config()
 const express = require('express')
 const Binance = require('node-binance-api')
 const { Webhook } = require('discord-webhook-node')
-const mins = require('./mins.json')
+const axios = require('axios')
 
 const app = express()
 const port = 3000
@@ -21,6 +21,16 @@ binance.balance((error, balances) => {
   app.locals.balances = balances
   return balances
 })
+
+const getStepSize = async (symbol) => {
+  const resp = await axios.get(
+    `https://api.binance.com/api/v3/exchangeInfo?symbol=${symbol}`
+  )
+  const data = resp.data.symbols[0].filters.filter(
+    (i) => i.filterType === 'LOT_SIZE'
+  )
+  return data[0].stepSize
+}
 
 const hook = new Webhook(process.env.DISCORD_WEBHOOK_URL)
 
@@ -53,8 +63,9 @@ app.post('/webhook', async (req, res) => {
       let qty = quantity
       if (price) {
         const tickers = await binance.bookTickers(ticker)
+        const stepSize = await getStepSize(ticker)
         qty = price / tickers.askPrice
-        qty = binance.roundStep(qty, mins[ticker].stepSize)
+        qty = binance.roundStep(qty, stepSize)
       }
       console.info(`Sending order : Market Buy - ${ticker} ${qty}`)
       hook.send(`Sending order : Market ${side} - ${ticker} ${qty}`)

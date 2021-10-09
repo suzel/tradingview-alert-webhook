@@ -1,6 +1,86 @@
 //-------------------------------------------------------------------------------------------------------
 
 //@version=4
+strategy("MACD Strategy", overlay=true)
+fastLength = input(12)
+slowLength = input(26)
+MACDLength = input(9)
+MACD = ema(close, fastLength) - ema(close, slowLength)
+aMACD = ema(MACD, MACDLength)
+delta = MACD - aMACD
+
+if(crossover(delta, 0))
+    strategy.entry("MacdLE", strategy.long, comment="MacdLE")
+if(crossunder(delta, 0))
+    strategy.entry("MacdSE", strategy.short, comment="MacdSE")
+
+plot(strategy.equity, title="equity", color=color.red, linewidth=2, style=plot.style_areabr)
+
+//-------------------------------------------------------------------------------------------------------
+
+//@version=5
+indicator(title="Average True Range", shorttitle="ATR", timeframe="")
+lengthInput = input.int(title="Length", defval=14, minval=1)
+smoothingInput = input.string(title="Smoothing", defval="RMA", options=["RMA", "SMA", "EMA", "WMA"])
+
+maFunction(source, length) =>
+    switch smoothingInput
+        "RMA" => ta.rma(source, length)
+        "SMA" => ta.sma(source, length)
+        "EMA" => ta.ema(source, length)
+        => ta.wma(source, length)
+
+plot(maFunction(ta.tr(true), lengthInput), title="ATR", color=#B71C1C)
+
+//-------------------------------------------------------------------------------------------------------
+
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © suzel
+
+//@version=5
+indicator("Benim Komutum", overlay=true)
+//strategy("Benim Komutum", overlay=true)
+
+sma20 = ta.sma(close, 20)
+sma60 = ta.sma(close, 60)
+
+c20 = if sma20[0] > sma20[1]
+    color.red
+else
+    color.blue
+
+// plot(sma20, color=c20)
+h1 = plot(sma20, title="SMA 20", color=color.blue)
+h2 = plot(sma60, title="SMA 60", color=color.green)
+
+// to_buy = sma20[1] < sma60[1] and sma20[0] > sma60[0]
+to_long = ta.crossover(sma20, sma60)
+to_close = ta.crossunder(sma20, sma60)
+
+plotchar(to_long, text="buy", location=location.belowbar, color=color.green)
+plotchar(to_close, text="sell", location=location.abovebar, color=color.red)
+
+// c = sma20 > sma60 ? color.new(color.red, transp=80) : color.new(color.white, transp=80)
+// fill(h1, h2, color=c)
+
+alertcondition(to_long, title="Long", message="Long {{close}} - {{tile}}")
+alertcondition(to_close, title="Short", message="Short {{close}} - {{tile}}")
+
+//strategy.entry("golden", strategy.long, qty=1000, when=to_long)
+//strategy.close("golden", qty=1000, when=to_close)
+
+dayhigh = request.security(syminfo.tickerid, "D", high)
+daylow = request.security(syminfo.tickerid, "D", low)
+
+plot(dayhigh[1], color=color.red, style=plot.style_line)
+plot(daylow[1], color=color.green, style=plot.style_line)
+
+cond = high[4] == ta.highest(high, 9)
+plotchar(cond, char="*", text="H", offset=-4)
+
+//-------------------------------------------------------------------------------------------------------
+
+//@version=4
 // Profit Tracker Indicator v1.0
 // Created by Suzel
 // www.sukruuzel.com

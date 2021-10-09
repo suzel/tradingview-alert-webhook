@@ -1,7 +1,9 @@
 @baseUrl = tradingview.sukruuzel.com
 @contentType = application/json
 @passphrase = suzel
+@exchange = BINANCE
 @ticker = UNIUSDT
+@position = 15
 
 ###
 
@@ -13,10 +15,27 @@ Content-Type: {{contentType}}
 {
   "passphrase": "{{passphrase}}",
   "time": "{{$timestamp}}",
-  "exchange": "BINANCE",
-  "side": "buy",
+  "exchange": "{{exchange}}",
   "ticker": "{{ticker}}",
-  "price": 15
+  "bar": {
+    "time": "{{$timestamp}}",
+    "open": 0.002748,
+    "high": 0.0027486,
+    "low": 0.002748,
+    "close": 0.0027486,
+    "volume": 150177
+  },
+  "strategy": {
+    "position_size": {{position}},
+    "order_action": "buy",
+    "order_contracts": {{position}},
+    "order_price": 0.0027451,
+    "order_id": "doge door",
+    "market_position": "long",
+    "market_position_size": {{position}},
+    "prev_market_position": "flat",
+    "prev_market_position_size": 0
+  }
 }
 
 ###
@@ -29,7 +48,25 @@ Content-Type: {{contentType}}
 {
   "passphrase": "{{passphrase}}",
   "time": "{{$timestamp}}",
-  "exchange": "BINANCE",
-  "side": "sell",
-  "ticker": "{{ticker}}"
+  "exchange": "{{exchange}}",
+  "ticker": "{{ticker}}",
+  "bar": {
+    "time": "{{$timestamp}}",
+    "open": 0.002748,
+    "high": 0.0027486,
+    "low": 0.002748,
+    "close": 0.0027486,
+    "volume": 150177
+  },
+  "strategy": {
+    "position_size": {{position}},
+    "order_action": "sell",
+    "order_contracts": {{position}},
+    "order_price": 0.0027451,
+    "order_id": "doge door",
+    "market_position": "long",
+    "market_position_size": {{position}},
+    "prev_market_position": "flat",
+    "prev_market_position_size": 0
+  }
 }
