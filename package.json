@@ -14,7 +14,7 @@
   },
   "main": "src/app.js",
   "engines": {
-    "node": ">=6.10.0",
+    "node": ">=6.11.0",
     "vscode": ">=7.24.1"
   },
   "scripts": {

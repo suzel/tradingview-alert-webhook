@@ -1,3 +1,55 @@
+//@version=3
+strategy(title="Take profit (% of instrument price)",
+     overlay=true, pyramiding=3)
+
+// STEP 1:
+// Make inputs that set the take profit % (optional)
+longProfitPerc = input(title="Long Take Profit (%)",
+     type=float, minval=0.0, step=0.1, defval=3) * 0.01
+
+shortProfitPerc = input(title="Short Take Profit (%)",
+     type=float, minval=0.0, step=0.1, defval=3) * 0.01
+
+// Calculate moving averages
+fastSMA = sma(close, 12)
+slowSMA = sma(close, 26)
+
+// Calculate trading conditions
+enterLong  = crossover(fastSMA, slowSMA)
+enterShort = crossunder(fastSMA, slowSMA)
+
+// Plot moving averages
+plot(series=fastSMA, color=teal)
+plot(series=slowSMA, color=orange)
+
+// STEP 2:
+// Figure out take profit price
+longExitPrice  = strategy.position_avg_price * (1 + longProfitPerc)
+shortExitPrice = strategy.position_avg_price * (1 - shortProfitPerc)
+
+// Plot take profit values for confirmation
+plot(series=(strategy.position_size > 0) ? longExitPrice : na,
+     color=green, style=circles,
+     linewidth=3, title="Long Take Profit")
+plot(series=(strategy.position_size < 0) ? shortExitPrice : na,
+     color=red, style=circles,
+     linewidth=3, title="Short Take Profit")
+
+// Submit entry orders
+if (enterLong)
+    strategy.entry(id="EL", long=true)
+
+if (enterShort)
+    strategy.entry(id="ES", long=false)
+
+// STEP 3:
+// Submit exit orders based on take profit price
+if (strategy.position_size > 0)
+    strategy.exit(id="XL TP", limit=longExitPrice)
+
+//if (strategy.position_size < 0)
+//    strategy.exit(id="XS TP", limit=shortExitPrice)
+
 //-------------------------------------------------------------------------------------------------------
 
 //@version=4
