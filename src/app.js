@@ -55,7 +55,10 @@ app.post('/webhook', async (req, res) => {
   const price = 50
 
   // Buy
-  if (order.strategy.order_action === 'buy') {
+  if (
+    order.strategy.order_action === 'buy' &&
+    order.strategy.order_id === 'EL'
+  ) {
     try {
       const tickers = await binance.bookTickers(ticker)
       const stepSize = await getStepSize(ticker)
@@ -73,7 +76,10 @@ app.post('/webhook', async (req, res) => {
   }
 
   // Sell
-  if (order.strategy.order_action === 'sell') {
+  if (
+    order.strategy.order_action === 'sell' &&
+    order.strategy.order_id === 'ES'
+  ) {
     try {
       qty = app.locals.balances[ticker.replace('USDT', '')].available
       console.info(`Sending order : Market Sell - ${ticker} ${qty}`)
