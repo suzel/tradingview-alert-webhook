@@ -37,38 +37,32 @@ const hook = new Webhook(process.env.DISCORD_WEBHOOK_URL)
 app.get('/health', async (req, res) => res.json({ status: 'UP' }))
 
 app.post('/webhook', async (req, res) => {
-  const {
-    exchange,
-    passphrase,
-    price = 0,
-    quantity = 0,
-    side = 'buy',
-    ticker,
-  } = req.body
+  const order = req.body
 
   // Validation
-  if (exchange !== 'BINANCE') {
+  if (order.exchange !== 'BINANCE') {
     res.json({ code: 'error', message: 'Invalid exchange' })
     return
   }
 
-  if (passphrase !== process.env.WEBHOOK_PASSPHRASE) {
+  if (order.passphrase !== process.env.WEBHOOK_PASSPHRASE) {
     res.json({ code: 'error', message: 'Invalid passphrase' })
     return
   }
 
+  const ticker = order.ticker
+  let qty = 1
+  const price = 50
+
   // Buy
-  if (side === 'buy') {
+  if (order.strategy.order_action === 'buy') {
     try {
-      let qty = quantity
-      if (price) {
-        const tickers = await binance.bookTickers(ticker)
-        const stepSize = await getStepSize(ticker)
-        qty = price / tickers.askPrice
-        qty = binance.roundStep(qty, stepSize)
-      }
+      const tickers = await binance.bookTickers(ticker)
+      const stepSize = await getStepSize(ticker)
+      qty = price / tickers.askPrice
+      qty = binance.roundStep(qty, stepSize)
       console.info(`Sending order : Market Buy - ${ticker} ${qty}`)
-      hook.send(`Sending order : Market ${side} - ${ticker} ${qty}`)
+      hook.send(`Sending order : Market Buy - ${ticker} ${qty}`)
       await binance.marketBuy(ticker, qty)
       res.json({ code: 'success', message: 'order executed' })
     } catch (err) {
@@ -79,12 +73,11 @@ app.post('/webhook', async (req, res) => {
   }
 
   // Sell
-  if (side === 'sell') {
+  if (order.strategy.order_action === 'sell') {
     try {
-      const qty = app.locals.balances[ticker.substring(0, 3)].available
-      // qty = binance.roundStep(qty, mins[ticker].stepSize)
+      qty = app.locals.balances[ticker.replace('USDT', '')].available
       console.info(`Sending order : Market Sell - ${ticker} ${qty}`)
-      hook.send(`Sending order : Market ${side} - ${ticker} ${qty}`)
+      hook.send(`Sending order : Market Sell - ${ticker} ${qty}`)
       await binance.marketSell(ticker, qty)
       res.json({ code: 'success', message: 'order executed' })
     } catch (err) {

@@ -41,6 +41,7 @@ plotshape(enterLong, style=shape.triangleup, location=location.belowbar, color=c
 plotshape(enterShort, style=shape.triangledown, location=location.abovebar, color=color.red)
 plot(series=(strategy.position_size > 0) ? longExitPrice : na, color=color.green, style=plot.style_circles, linewidth=1, title="Long Take Profit")
 plot(series=(strategy.position_size < 0) ? shortExitPrice : na, color=color.red, style=plot.style_circles, linewidth=1, title="Short Take Profit")
+plot(ta.ema(close, 200), color=color.rgb(26,66,56, transp=50), linewidth=3)
 
 // Submit entry orders
 strategy.entry("EL", strategy.long, when=enterLong)
