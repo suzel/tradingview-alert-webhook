@@ -17,6 +17,8 @@
     "order_contracts": 10000,
     "order_price": 0.0027451,
     "order_id": "doge door",
+    "order_comment": "",
+    "order_alert_message": "",
     "market_position": "long",
     "market_position_size": 10000,
     "prev_market_position": "flat",

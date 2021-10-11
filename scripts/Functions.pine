@@ -135,24 +135,6 @@ plot(longSMA, color=color.black)
 
 
 
-//@version=4
-strategy("Pair Trade: Apple & Google")
-
-google_close = security("GOOG", "D", close)
-google_open = security("GOOG", "D", open)
-
-price_change = google_close / google_open
-
-if price_change < 0.95
-    strategy.entry("long", strategy.long, 100)
-
-if price_change > 1.05
-    strategy.entry("short", strategy.short, 100)
-
-plot(price_change)
-
-
-
 // Daily Open Prices
 tdo = security(syminfo.tickerid, 'D', open) // today
 ydo = security(syminfo.tickerid, 'D', open[1]) // yesterday
@@ -217,24 +199,3 @@ TurningBearish=BearishEngulfingCandle()
 TurningBullish=BullishEngulfingCandle()
 plotchar(TurningBearish, char='📉', color=color.red, size=size.small)
 plotshape(TurningBullish, style='📈', color=color.green, location=location.top)
-
-
-
-
-//@version=4
-study(title="Golden Line", shorttitle="GLD", overlay=true, resolution="240")
-smma(src, length) =>
-    smma = 0.0
-    smma := na(smma[1]) ? sma(src, length) : (smma[1] * (length - 1) + src) / length
-    smma
-v1 = smma(hl2, 15)
-m1 = smma(hl2, 19)
-m2 = smma(hl2, 25)
-v2 = smma(hl2, 29)
-p2 = v1<m1 != v1<v2 or m2<v2 != v1<v2
-p3 = not p2 and v1<v2
-p1 = not p2 and not p3
-c = p1 ? color.orange : p2 ? color.silver : color.navy
-line1 = plot(v1, "Line 1", color=c)
-line2 = plot(v2, "Line 2", color=c)
-fill(line1, line2, color=c)

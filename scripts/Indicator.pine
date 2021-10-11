@@ -1,0 +1,53 @@
+//@version=5
+// Profit Tracker v1.0
+// Created by Suzel
+// www.sukruuzel.com
+
+strategy("Profit Tracker", shorttitle="PT", overlay=true, pyramiding=1)
+
+sourceMA = input.string(title="MA Type", defval="RMA", options=["RMA", "SMA", "EMA", "VWMA", "WMA"], group="Moving Average")
+lengthFastMA = input.int(title="Fast MA Length", defval=12, minval=1, group="Moving Average")
+lengthSlowMA = input.int(title="Slow MA Length", defval=26, minval=1, group="Moving Average")
+longProfit = input.float(title="Long Take Profit (%)", minval=0.0, step=0.1, defval=3, group="TP - SL") * 0.01
+shortProfit = input.float(title="Short Take Profit (%)", minval=0.0, step=0.1, defval=3, group="TP - SL") * 0.01
+
+maFunction(source, length) =>
+    switch sourceMA
+        "RMA" => ta.rma(source, length)
+        "SMA" => ta.sma(source, length)
+        "EMA" => ta.ema(source, length)
+        "VWMA" => ta.vwma(source, length)
+        => ta.wma(source, length)
+
+// Calculate moving averages
+fastMA = maFunction(close, lengthFastMA)
+slowMA = maFunction(close, lengthSlowMA)
+
+// Calculate trading conditions
+enterLong = ta.crossover(fastMA, slowMA)
+enterShort = ta.crossunder(fastMA, slowMA)
+
+// Figure out take profit price
+longExitPrice = strategy.position_avg_price * (1 + longProfit)
+shortExitPrice = strategy.position_avg_price * (1 - shortProfit)
+
+// Plot moving averages
+h1 = plot(fastMA, linewidth=1, color=color.green)
+h2 = plot(slowMA, linewidth=1, color=color.red)
+// fillColor = fastMA > slowMA ? color.new(color.green, transp=90) : color.new(color.red, transp=90)
+// fill(h1, h2, color=fillColor)
+
+plotshape(enterLong, style=shape.triangleup, location=location.belowbar, color=color.green)
+plotshape(enterShort, style=shape.triangledown, location=location.abovebar, color=color.red)
+plot(series=(strategy.position_size > 0) ? longExitPrice : na, color=color.green, style=plot.style_circles, linewidth=1, title="Long Take Profit")
+plot(series=(strategy.position_size < 0) ? shortExitPrice : na, color=color.red, style=plot.style_circles, linewidth=1, title="Short Take Profit")
+
+// Submit entry orders
+strategy.entry("EL", strategy.long, when=enterLong)
+strategy.entry("ES", strategy.short, when=enterShort) // Close ?
+
+// Submit exit orders based on take profit price
+if(strategy.position_size > 0)
+    strategy.exit("XL TP", limit=longExitPrice)
+if(strategy.position_size < 0)
+    strategy.exit("XS TP", limit=shortExitPrice)
