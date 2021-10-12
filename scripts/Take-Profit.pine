@@ -34,14 +34,13 @@ shortExitPrice = strategy.position_avg_price * (1 - shortProfit)
 // Plot moving averages
 h1 = plot(fastMA, linewidth=1, color=color.green)
 h2 = plot(slowMA, linewidth=1, color=color.red)
-// fillColor = fastMA > slowMA ? color.new(color.green, transp=90) : color.new(color.red, transp=90)
-// fill(h1, h2, color=fillColor)
+fillColor = fastMA > slowMA ? color.new(color.green, transp=75) : color.new(color.red, transp=75)
+fill(h1, h2, color=fillColor)
 
 plotshape(enterLong, style=shape.triangleup, location=location.belowbar, color=color.green)
 plotshape(enterShort, style=shape.triangledown, location=location.abovebar, color=color.red)
 plot(series=(strategy.position_size > 0) ? longExitPrice : na, color=color.green, style=plot.style_circles, linewidth=1, title="Long Take Profit")
 plot(series=(strategy.position_size < 0) ? shortExitPrice : na, color=color.red, style=plot.style_circles, linewidth=1, title="Short Take Profit")
-plot(ta.ema(close, 200), color=color.rgb(26,66,56, transp=50), linewidth=3)
 
 // Submit entry orders
 strategy.entry("EL", strategy.long, when=enterLong)

@@ -7,7 +7,7 @@
 
 ###
 
-# @name buy
+# @name Buy
 
 POST https://{{baseUrl}}/webhook HTTP/1.1
 Content-Type: {{contentType}}
@@ -31,6 +31,8 @@ Content-Type: {{contentType}}
     "order_contracts": {{position}},
     "order_price": 0.0027451,
     "order_id": "doge door",
+    "order_comment": "",
+    "order_alert_message": "",
     "market_position": "long",
     "market_position_size": {{position}},
     "prev_market_position": "flat",
@@ -40,7 +42,7 @@ Content-Type: {{contentType}}
 
 ###
 
-# @name sell
+# @name Sell
 
 POST https://{{baseUrl}}/webhook HTTP/1.1
 Content-Type: {{contentType}}
@@ -64,6 +66,8 @@ Content-Type: {{contentType}}
     "order_contracts": {{position}},
     "order_price": 0.0027451,
     "order_id": "doge door",
+    "order_comment": "",
+    "order_alert_message": "",
     "market_position": "long",
     "market_position_size": {{position}},
     "prev_market_position": "flat",
