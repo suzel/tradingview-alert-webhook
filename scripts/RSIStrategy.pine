@@ -1,0 +1,27 @@
+//@version=5
+// RSI Strategy v1.0
+// Created by Suzel
+// www.sukruuzel.com
+
+strategy("RSI Strategy", overlay=true)
+
+// Create Indicator's
+shortSMA = ta.sma(close, 10)
+longSMA = ta.sma(close, 30)
+rsi = ta.rsi(close, 14)
+atr = ta.atr(14)
+
+// Specify crossover conditions
+longCondition = ta.crossover(shortSMA, longSMA)
+shortCondition = ta.crossunder(shortSMA, longSMA)
+
+// Execute trade if condition is True
+if (longCondition)
+    stopLoss = low - atr * 2
+    takeProfit = high + atr * 2
+    strategy.entry("long", strategy.long, 100, when = rsi > 50)
+    strategy.exit("exit", "long", stop=stopLoss, limit=takeProfit)
+
+// Plot Moving Average's to chart
+plot(shortSMA, linewidth=3, color=color.black)
+plot(longSMA, linewidth=1, color=color.black)

@@ -22,7 +22,6 @@ app.get('/health', async (req, res) => res.json({ status: 'UP' }))
 app.post('/webhook', async (req, res) => {
   const order = req.body
 
-  // Validation
   if (!['BINANCE', 'NASDAQ', 'NYSE'].includes(order.exchange)) {
     res.json({ code: 'error', message: 'Invalid exchange' })
     return
@@ -48,11 +47,12 @@ app.post('/webhook', async (req, res) => {
       break
   }
 
-  const resultHandler = (error, response) => {
-    res.json({
-      code: error ? 'error' : 'success',
-      message: 'order executed:' + response.orderId,
-    })
+  const resultHandler = (error, resp) => {
+    const message = error
+      ? `Order failed. Error: ${error.body}`
+      : `Order executed. OrderID: ${resp.orderId}`
+    console.log(message)
+    res.json({ code: error ? 'error' : 'success', message })
   }
 })
 

@@ -10,7 +10,7 @@ TradingView Strategy Alert Webhook that buys and sells crypto with the Binance A
 
 ## Requirements
 
-- Node.js (v16.11.0)
+- Node.js (v16.11.1)
 - NPM (8.0.0)
 
 ## Installation
