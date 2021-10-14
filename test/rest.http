@@ -3,7 +3,7 @@
 @passphrase = suzel
 @exchange = BINANCE
 @ticker = UNIUSDT
-@position = 15
+@position = 50
 
 ###
 
@@ -19,23 +19,23 @@ Content-Type: {{contentType}}
   "ticker": "{{ticker}}",
   "bar": {
     "time": "{{$timestamp}}",
-    "open": 0.002748,
-    "high": 0.0027486,
-    "low": 0.002748,
-    "close": 0.0027486,
-    "volume": 150177
+    "open": 0.0,
+    "high": 0.0,
+    "low": 0.0,
+    "close": 0.0,
+    "volume": 0
   },
   "strategy": {
     "position_size": {{position}},
     "order_action": "buy",
-    "order_contracts": {{position}},
-    "order_price": 0.0027451,
-    "order_id": "doge door",
+    "order_contracts": 1,
+    "order_price": 0.0,
+    "order_id": "",
     "order_comment": "",
     "order_alert_message": "",
-    "market_position": "long",
-    "market_position_size": {{position}},
-    "prev_market_position": "flat",
+    "market_position": "",
+    "market_position_size": 0,
+    "prev_market_position": "",
     "prev_market_position_size": 0
   }
 }
@@ -54,23 +54,23 @@ Content-Type: {{contentType}}
   "ticker": "{{ticker}}",
   "bar": {
     "time": "{{$timestamp}}",
-    "open": 0.002748,
-    "high": 0.0027486,
-    "low": 0.002748,
-    "close": 0.0027486,
-    "volume": 150177
+    "open": 0.0,
+    "high": 0.0,
+    "low": 0.0,
+    "close": 0.0,
+    "volume": 0
   },
   "strategy": {
     "position_size": {{position}},
     "order_action": "sell",
-    "order_contracts": {{position}},
-    "order_price": 0.0027451,
-    "order_id": "doge door",
+    "order_contracts": 1,
+    "order_price": 0.0,
+    "order_id": "",
     "order_comment": "",
     "order_alert_message": "",
-    "market_position": "long",
-    "market_position_size": {{position}},
-    "prev_market_position": "flat",
+    "market_position": "",
+    "market_position_size": 0,
+    "prev_market_position": "",
     "prev_market_position_size": 0
   }
 }

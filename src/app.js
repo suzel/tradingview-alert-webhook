@@ -1,15 +1,45 @@
 require('dotenv').config()
 
-// const axios = require('axios')
+const axios = require('axios')
 const express = require('express')
 const Binance = require('node-binance-api')
 
-// const binanceAPI = axios.create({ baseURL: process.env.BINANCE_API_URL })
+const binanceAPI = axios.create({ baseURL: process.env.BINANCE_API_URL })
 
 const binance = new Binance().options({
   APIKEY: process.env.BINANCE_API_KEY,
   APISECRET: process.env.BINANCE_API_SECRET,
 })
+
+// Helper Methods
+const roundStep = async (ticker, price) => {
+  const [bookTicker, exchangeInfo] = await Promise.all([
+    binanceAPI.get(`/ticker/bookTicker?symbol=${ticker}`),
+    binanceAPI.get(`/exchangeInfo?symbol=${ticker}`),
+  ])
+  const { stepSize } = exchangeInfo.data.symbols[0].filters.filter(
+    (i) => i.filterType === 'LOT_SIZE'
+  )[0]
+  const qty = price / bookTicker.data.askPrice
+  return binance.roundStep(qty, stepSize)
+}
+
+const roundStepForSell = async (ticker) => {
+  const assetInfo = await binanceAPI.get(`/exchangeInfo?symbol=${ticker}`)
+  const res = assetInfo.data.symbols[0]
+  const { stepSize } = res.filters.filter((i) => i.filterType === 'LOT_SIZE')[0]
+  const balance = await binance.balance()
+  return binance.roundStep(balance[res.baseAsset].available, stepSize)
+}
+
+// // Set minimum order amount with minQty
+// if ( amount < minQty ) amount = minQty;
+// // Set minimum order amount with minNotional
+// if ( price * amount < minNotional ) {
+// 	amount = minNotional / price;
+// }
+// // Round to stepSize
+// amount = binance.roundStep(amount, stepSize);
 
 const app = express()
 const port = 3000
@@ -48,37 +78,18 @@ app.post('/webhook', async (req, res) => {
 
   switch (action) {
     case 'buy':
-      binance.marketBuy(ticker, quantity, resultHandler)
+      binance.marketBuy(
+        ticker,
+        await roundStep(ticker, quantity),
+        resultHandler
+      )
       break
     case 'sell':
-      binance.marketSell(ticker, quantity, resultHandler)
+      binance.marketSell(ticker, await roundStepForSell(ticker), resultHandler)
       break
     default:
       break
   }
 })
-
-/* const roundStep = async (ticker, price) => {
-  const [bookTicker, exchangeInfo] = await Promise.all([
-    binanceAPI.get(`/ticker/bookTicker?symbol=${ticker}`),
-    binanceAPI.get(`/exchangeInfo?symbol=${ticker}`),
-  ])
-  const { stepSize } = exchangeInfo.data.symbols[0].filters.filter(
-    (i) => i.filterType === 'LOT_SIZE'
-  )[0]
-  const qty = price / bookTicker.data.askPrice
-  return binance.roundStep(qty, stepSize)
-} */
-
-// // Set minimum order amount with minQty
-// if ( amount < minQty ) amount = minQty;
-
-// // Set minimum order amount with minNotional
-// if ( price * amount < minNotional ) {
-// 	amount = minNotional / price;
-// }
-
-// // Round to stepSize
-// amount = binance.roundStep(amount, stepSize);
 
 app.listen(port, () => console.log(`App listening at http://localhost:${port}`))
