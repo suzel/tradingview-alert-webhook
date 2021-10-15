@@ -3,25 +3,34 @@
 // Created by Suzel
 // www.sukruuzel.com
 
-strategy("RSI Strategy", overlay=true)
+strategy(title="RSI Strategy TEST",
+         initial_capital=50,
+         default_qty_value=100,
+         default_qty_type=strategy.percent_of_equity,
+         format=format.price,
+         precision=2,
+         overlay=true)
 
-// Create Indicator's
-shortSMA = ta.sma(close, 10)
-longSMA = ta.sma(close, 30)
-rsi = ta.rsi(close, 14)
-atr = ta.atr(14)
+// Get user input
+rsiSource = input.source(title="RSI Source", defval=close)
+rsiLength = input.int(title="RSI Length", defval=14)
+rsiOverbought = input.int(title="RSI Overbought Level", defval=70)
+rsiOversold = input.int(title="RSI Oversold Level", defval=30)
 
-// Specify crossover conditions
-longCondition = ta.crossover(shortSMA, longSMA)
-shortCondition = ta.crossunder(shortSMA, longSMA)
+// Get RSI value
+rsiValue = ta.rsi(rsiSource, rsiLength)
+rsiOB = rsiValue >= rsiOverbought
+rsiOS = rsiValue <= rsiOversold
+
+// Identify engulfing candles
+bullishEC = close > open[1] and close[1] < open[1]
+bearishEC = close < open[1] and close[1] > open[1]
+tradeSignal = ((rsiOS or rsiOS[1]) and bullishEC) or ((rsiOB or rsiOB[1]) and bearishEC)
 
 // Execute trade if condition is True
-if (longCondition)
-    stopLoss = low - atr * 2
-    takeProfit = high + atr * 2
-    strategy.entry("long", strategy.long, 100, when = rsi > 50)
-    strategy.exit("exit", "long", stop=stopLoss, limit=takeProfit)
+strategy.entry("long", strategy.long, 100, when=tradeSignal and bullishEC)
+strategy.close("long", when=tradeSignal and bearishEC)
 
-// Plot Moving Average's to chart
-plot(shortSMA, linewidth=3, color=color.black)
-plot(longSMA, linewidth=1, color=color.black)
+// Plot signals to chart
+plotshape(tradeSignal and bullishEC, title="Long", location=location.belowbar, color=color.green, style=shape.triangleup, text="Long")
+plotshape(tradeSignal and bearishEC, title="Short", location=location.abovebar, color=color.red, style=shape.triangledown, text="Short")

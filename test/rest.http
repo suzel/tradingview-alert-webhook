@@ -2,8 +2,8 @@
 @contentType = application/json
 @passphrase = suzel
 @exchange = BINANCE
-@ticker = UNIUSDT
-@position = 50
+@ticker = BATUSDT
+@position = 30.39
 
 ###
 
