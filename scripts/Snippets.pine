@@ -1,5 +1,12 @@
 //-----------------------------------------------------------------------------
 
+strategy.entry("long", strategy.long, when = LongEnter, qty = 100)
+strategy.close("long", when = LongExit)
+strategy.entry("short", strategy.short, when = ShortEnter, qty = 100)
+strategy.close("short", when = ShortExit)
+
+//-----------------------------------------------------------------------------
+
 // Execute trade if condition is True
 // if (longCondition)
 //     stopLoss = low - atr * 2
