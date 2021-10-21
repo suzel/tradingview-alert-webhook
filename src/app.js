@@ -24,13 +24,12 @@ const roundStep = async (ticker, price) => {
   return binance.roundStep(qty, stepSize)
 }
 
-// const roundStepForSell = async (ticker) => {
-//   const assetInfo = await binanceAPI.get(`/exchangeInfo?symbol=${ticker}`)
-//   const res = assetInfo.data.symbols[0]
-//   const { stepSize } = res.filters.filter((i) => i.filterType === 'LOT_SIZE')[0]
-//   const balance = await binance.balance()
-//   return binance.roundStep(balance[res.baseAsset].available, stepSize)
-// }
+const getBalanceForTicker = async (ticker) => {
+  const assetInfo = await binanceAPI.get(`/exchangeInfo?symbol=${ticker}`)
+  const { baseAsset } = assetInfo.data.symbols[0]
+  const balance = await binance.balance()
+  return parseFloat(balance[baseAsset].available)
+}
 
 // // Set minimum order amount with minQty
 // if ( amount < minQty ) amount = minQty;
@@ -85,7 +84,11 @@ app.post('/webhook', async (req, res) => {
       )
       break
     case 'sell':
-      binance.marketSell(ticker, quantity, resultHandler)
+      binance.marketSell(
+        ticker,
+        await getBalanceForTicker(ticker),
+        resultHandler
+      )
       break
     default:
       break
