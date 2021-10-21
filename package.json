@@ -14,7 +14,7 @@
   },
   "main": "src/app.js",
   "engines": {
-    "node": ">=16.11.1",
+    "node": ">=16.12.1",
     "npm": ">=8.0.0"
   },
   "scripts": {
