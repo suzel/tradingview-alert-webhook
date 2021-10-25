@@ -1,9 +1,16 @@
-//-----------------------------------------------------------------------------
+//@version=4
+strategy("My Strategy", overlay=true, margin_long=100, margin_short=100)
 
-strategy.entry("long", strategy.long, when = LongEnter, qty = 100)
-strategy.close("long", when = LongExit)
-strategy.entry("short", strategy.short, when = ShortEnter, qty = 100)
-strategy.close("short", when = ShortExit)
+
+long_tp_inp = input(100, title="Long Take Profit %", step=0.1) / 100
+price = strategy.position_avg_price * (1 + long_tp_inp)
+plot(price)
+
+
+if bar_index == 1
+    strategy.entry ("LONG", true)
+
+strategy.exit("EXIT", "LONG", limit =   price)
 
 //-----------------------------------------------------------------------------
 
@@ -22,11 +29,6 @@ strategy.close("short", when = ShortExit)
 
 //-----------------------------------------------------------------------------
 
-strategy.entry("doge door", strategy.long, when=buy_condition)
-strategy.close("doge door",  when=sell_condition)
-
-//-----------------------------------------------------------------------------
-
 start_date = input(title="Start Date", type=input.integer, defval=4, minval=1, maxval=31)
 start_month = input(title="Start Month", type=input.integer, defval=9, minval=1, maxval=12)
 start_year = input(title="Start Year", type=input.integer, defval=2020)
@@ -38,30 +40,3 @@ between_dates = (time >= timestamp(start_year, start_month, start_date, 7, 0)) a
 
 if between_dates
     strategy.entry("doge door", strategy.long, when=buy_condition)
-
-//-----------------------------------------------------------------------------
-
-strategy(title="Relative Strength Index", shorttitle="RSI Strategy", format=format.price, precision=2)
-
-// Inputs
-i_oversold      = input(30, title="Oversold")
-i_overbought    = input(70, title="Overbought")
-len             = input(14, minval=1, title="Length")
-src             = input(close, "Source", type = input.source)
-
-// Calculations
-up              = rma(max(change(src), 0), len)
-down            = rma(-min(change(src), 0), len)
-rsi             = down == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + up / down))
-
-// Plotting Calls
-plot(rsi, "RSI", color=#8E1599)
-band1 = hline(70, "Upper Band", color=#C0C0C0)
-band0 = hline(30, "Lower Band", color=#C0C0C0)
-fill(band1, band0, color=#9915FF, transp=90, title="Background")
-
-// Strategy functions
-if rsi < i_oversold
-    strategy.entry(id="RSI Oversold Go Long", long=strategy.long)
-if rsi > i_overbought
-    strategy.entry(id="RSI Overbought Go Short", long=false)

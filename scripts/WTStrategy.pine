@@ -1,16 +1,17 @@
-//@version=5
-// Wave Trend Osilator Strategy v1.0
+// @version=5
+// WaveTrend Osilator Strategy v1.0
 // Created by Suzel
 // www.sukruuzel.com
 
-strategy(
-         title="WaveTrend Oscillator Strategy (Test)",
-         shorttitle="WT_OSC_TEST",
+strategy(title="WaveTrend Oscillator Strategy",
+         shorttitle="WT_OSC",
          currency=currency.USD,
-         default_qty_value=1,
+         default_qty_value=50,
+         default_qty_type=strategy.cash,
+         format=format.price,
          initial_capital=50,
-         margin_long=100,
-         margin_short=100,
+         precision=2,
+         pyramiding=1,
          overlay=false)
 
 // Get user input
@@ -21,7 +22,7 @@ obLevel2 = input.int(title="Over Bought Level 2", defval=53)
 osLevel1 = input.int(title="Over Sold Level 1", defval=-60)
 osLevel2 = input.int(title="Over Sold Level 2", defval=-53)
 
-// Calculation
+// Calculate trading conditions
 ap = hlc3
 esa = ta.ema(ap, n1)
 d = ta.ema(math.abs(ap - esa), n1)
@@ -32,30 +33,27 @@ wt1 = tci
 wt2 = ta.sma(wt1,4)
 diff = wt1 - wt2
 
-longCondition  = ta.crossover(wt1, wt2) and (wt1 < osLevel1)
-shortCondition = ta.crossunder(wt1, wt2) and (wt2 > obLevel2)
+buyCondition  = ta.crossover(wt1, wt2) and (wt1 < osLevel1)
+sellCondition = ta.crossunder(wt1, wt2) and (wt2 > obLevel2)
+// openLong = (ta.cross(wt1, wt2) and (wt1<osLevel1))
+// closeLong = (wt1>obLevel2) and (wt1<obLevel1)
+// openShort = (ta.cross(wt1, wt2) and (wt1>obLevel1))
+// closeShort = (wt1<osLevel2) and (wt1>osLevel1)
 
-openLong = (ta.cross(wt1, wt2) and (wt1<osLevel1))
-closeLong = (wt1>obLevel2) and (wt1<obLevel1)
-openShort = (ta.cross(wt1, wt2) and (wt1>obLevel1))
-closeShort = (wt1<osLevel2) and (wt1>osLevel1)
-
+// Draw bought lines
 ob_limit_line = hline(obLevel1, title="Overbought Limit Line", color=color.red, linestyle=hline.style_solid)
-ob_cutoff_line = hline(osLevel1, title="Overbought Cutoff Line", color=color.gray, linestyle=hline.style_dotted)
-zero_ref_line = hline(0, title="Zero Reference Line", color=color.gray, linestyle=hline.style_dashed)
-os_cutoff_line = hline(obLevel2, title="Oversold Cutoff Line", color=color.gray, linestyle=hline.style_dotted)
-os_limit_line = hline(osLevel2, title="Oversold Limit Line", color=color.green, linestyle=hline.style_solid)
-// fill(os_cutoff_line, ob_limit_line, title="Overbought Zone", color=color.new(color.red, transp=90))
-// fill(ob_cutoff_line, os_limit_line, title="Oversold Zone", color=color.new(color.green, transp=90))
+ob_cutoff_line = hline(osLevel1, title="Overbought Cutoff Line", color=color.green, linestyle=hline.style_solid)
+zero_ref_line = hline(0, title="Zero Reference Line", color=color.gray, linestyle=hline.style_dotted)
+os_cutoff_line = hline(obLevel2, title="Oversold Cutoff Line", color=color.red, linestyle=hline.style_dotted)
+os_limit_line = hline(osLevel2, title="Oversold Limit Line", color=color.green, linestyle=hline.style_dotted)
 
 // Plot signals to chart
 plot(wt1, color=color.rgb(0,128,0,30), style=plot.style_line)
 plot(wt2, color=color.rgb(255,0,0,30), style=plot.style_line)
 plot(diff, color=color.new(color.white, transp=90), style=plot.style_area)
-plot(ta.cross(wt1, wt2) ? wt2 : na, color = color.black , style = plot.style_circles, linewidth = 2)
-plot(ta.cross(wt1, wt2) ? wt2 : na, color = (wt2 - wt1 > 0 ? color.red : color.lime), style = plot.style_circles, linewidth = 2)
-// barcolor(cross(wt1, wt2) ? (wt2 - wt1 > 0 ? aqua : yellow) : na)
+plot(ta.cross(wt1, wt2) ? wt2 : na, color = color.black , style=plot.style_circles, linewidth=2)
+plot(ta.cross(wt1, wt2) ? wt2 : na, color = (wt2 - wt1 > 0 ? color.red : color.lime), style=plot.style_circles, linewidth=2)
 
 // Execute trade if condition is True
-strategy.entry("LE", strategy.long, when=longCondition)
-strategy.close("LE", when=shortCondition)
+strategy.entry("LE", strategy.long, when=buyCondition)
+strategy.close("LE", when=sellCondition)

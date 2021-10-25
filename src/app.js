@@ -31,14 +31,13 @@ const getBalanceForTicker = async (ticker) => {
   return parseFloat(balance[baseAsset].available)
 }
 
+// TODO: Check minimum order amount
 // // Set minimum order amount with minQty
 // if ( amount < minQty ) amount = minQty;
 // // Set minimum order amount with minNotional
 // if ( price * amount < minNotional ) {
 // 	amount = minNotional / price;
 // }
-// // Round to stepSize
-// amount = binance.roundStep(amount, stepSize);
 
 const app = express()
 const port = 3000
@@ -51,7 +50,7 @@ app.get('/health', async (req, res) => res.json({ status: 'UP' }))
 app.post('/webhook', async (req, res) => {
   const order = req.body
 
-  if (!['BINANCE', 'NASDAQ', 'NYSE'].includes(order.exchange)) {
+  if (!['BINANCE'].includes(order.exchange)) {
     res.json({ code: 'error', message: 'Invalid exchange' })
     return
   }
@@ -63,9 +62,14 @@ app.post('/webhook', async (req, res) => {
 
   const { ticker } = order
   const action = order.strategy.order_action
-  const quantity = order.strategy.position_size
+  let quantity = order.strategy.position_size
 
-  console.info(`Sending order : Market ${action} - ${ticker} ${quantity}`)
+  quantity =
+    action === 'buy'
+      ? await roundStep(ticker, quantity)
+      : await getBalanceForTicker(ticker)
+
+  console.log(`Sending order : Market ${action} - ${ticker} ${quantity}`)
 
   const resultHandler = (error, resp) => {
     const message = error
@@ -77,18 +81,10 @@ app.post('/webhook', async (req, res) => {
 
   switch (action) {
     case 'buy':
-      binance.marketBuy(
-        ticker,
-        await roundStep(ticker, quantity),
-        resultHandler
-      )
+      binance.marketBuy(ticker, quantity, resultHandler)
       break
     case 'sell':
-      binance.marketSell(
-        ticker,
-        await getBalanceForTicker(ticker),
-        resultHandler
-      )
+      binance.marketSell(ticker, quantity, resultHandler)
       break
     default:
       break
