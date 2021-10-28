@@ -1,9 +1,9 @@
-//@version=5
+// @version=5
 // RSI Strategy v1.0
 // Created by Suzel
 // www.sukruuzel.com
 
-strategy(title="RSI Strategy TEST",
+strategy(title="RSI Strategy",
          initial_capital=50,
          default_qty_value=100,
          default_qty_type=strategy.percent_of_equity,
