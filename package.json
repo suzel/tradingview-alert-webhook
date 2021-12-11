@@ -14,7 +14,7 @@
   },
   "main": "src/app.js",
   "engines": {
-    "node": ">=17.0.1",
+    "node": ">=17.2.0",
     "npm": ">=8.1.4"
   },
   "scripts": {
@@ -30,7 +30,7 @@
     "node-binance-api": "^0.13.1"
   },
   "devDependencies": {
-    "eslint": "^8.4.0",
+    "eslint": "^8.4.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.3",
