@@ -14,8 +14,8 @@
   },
   "main": "src/app.js",
   "engines": {
-    "node": ">=17.4.0",
-    "npm": ">=8.3.1"
+    "node": ">=17.5.0",
+    "npm": ">=8.5.1"
   },
   "scripts": {
     "dev": "nodemon src/app.js localhost 3000",
@@ -24,13 +24,13 @@
     "start": "node src/app.js"
   },
   "dependencies": {
-    "axios": "^0.25.0",
-    "dotenv": "^14.2.0",
-    "express": "^4.17.2",
+    "axios": "^0.26.0",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
     "node-binance-api": "^0.13.1"
   },
   "devDependencies": {
-    "eslint": "^8.7.0",
+    "eslint": "^8.9.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.4",

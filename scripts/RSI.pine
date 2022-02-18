@@ -1,0 +1,49 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// ©TrendciHoca
+
+//@version=4
+study("RSI Long Short By Trendci Hoca", overlay=true)
+
+// Input
+AcilCikis = input(false, "Stop ?")
+RSIlong = input(35, "RSI  Long Point")
+RSIclose = input(75, "RSI  Short Point")
+AcilCikisNoktasi = input(10, "RSI Stop Point")
+
+// RSI
+rsi = rsi(close, 14)
+
+// Conditions
+long = crossover(rsi, RSIlong)
+longclose = crossunder(rsi, RSIclose)
+stop= crossunder(rsi, AcilCikisNoktasi)
+
+
+plotshape(long,  title = "AL",  text = '✔',  style = shape.labelup,   location = location.belowbar, color= color.green, textcolor = color.white,  size = size.tiny)
+plotshape(longclose  or (stop and AcilCikis ==true), title = "SAT", text = '!', style = shape.labeldown, location = location.abovebar, color= color.red,   textcolor = color.white, size = size.tiny)
+
+
+
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// ©TrendciHoca
+
+//@version=4
+study("RSI Long Short By Trendci Hoca", overlay=true)
+
+// Input
+AcilCikis = input(false, "Stop ?")
+RSIlong = input(35, "RSI  Long Point")
+RSIclose = input(75, "RSI  Short Point")
+AcilCikisNoktasi = input(10, "RSI Stop Point")
+
+// RSI
+rsi = rsi(close, 14)
+
+// Conditions
+long = crossover(rsi, RSIlong)
+longclose = crossunder(rsi, RSIclose)
+stop= crossunder(rsi, AcilCikisNoktasi)
+
+
+plotshape(long,  title = "AL",  text = '✔',  style = shape.labelup,   location = location.belowbar, color= color.green, textcolor = color.white,  size = size.tiny)
+plotshape(longclose  or (stop and AcilCikis ==true), title = "SAT", text = '!', style = shape.labeldown, location = location.abovebar, color= color.red,   textcolor = color.white, size = size.tiny)
