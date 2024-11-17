@@ -31,14 +31,6 @@ const getBalanceForTicker = async (ticker) => {
   return parseFloat(balance[baseAsset].available)
 }
 
-// TODO: Check minimum order amount
-// // Set minimum order amount with minQty
-// if ( amount < minQty ) amount = minQty;
-// // Set minimum order amount with minNotional
-// if ( price * amount < minNotional ) {
-// 	amount = minNotional / price;
-// }
-
 const app = express()
 const port = 3000
 
