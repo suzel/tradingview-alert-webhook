@@ -1,6 +1,6 @@
-@baseUrl = tradingview.sukruuzel.com
+@baseUrl = tradingview.domain.com
 @contentType = application/json
-@passphrase = suzel
+@passphrase = user
 @exchange = BINANCE
 @ticker = BATUSDT
 @position = 30.39
